@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * @file
+ * Contains bhcc_case_management.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\webform\WebformInterface;
+
+/**
+ * Implements hook_help().
+ */
+function bhcc_case_management_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the bhcc_case_management module.
+    case 'help.page.bhcc_case_management_id':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Case Management and Citizen ID Intergration') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bhcc_case_management_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  if (strpos($form_id, 'webform_submission', 0) === 0 && method_exists($form_state->getFormObject(), 'getEntity')) {
+
+    $webform = $form_state->getFormObject()->getEntity()->getWebform();
+
+    if (!empty($form['elements']['citizenidtoken'])) {
+      // In theroy these should invalidate the cache...?
+      $form['#cache']['contexts'][] = 'user.roles:anonymous';
+      $form['#cache']['contexts'][] = 'session';
+      $form['#cache']['contexts'][] = 'cookies:citizenidtoken';
+      // However this needs to be triggered for anon users, making above redundant?
+      \Drupal::service('page_cache_kill_switch')->trigger();
+
+      // Drupal Token check
+      $cookieVars = \Drupal::Request()->cookies->all();
+      if (empty($cookieVars['citizenidtoken'])) {
+
+        // Test if citizen ID is required for the form.
+        // To allow anonymous access, in custom properties set allow_anon: TRUE
+        $allow_anon = !empty($form['elements']['citizenidtoken']['#allow_anon']) ? TRUE : FALSE;
+        // To allow form builders to test a webform, give them the permission
+        // bypass citizen id check
+        $bypass_citizenid = \Drupal::currentUser()->hasPermission('bypass citizen id check');
+        if (!$allow_anon && !$bypass_citizenid) {
+          // If there is no token, redirect to an error page
+          _bhcc_case_management_error_redirect($webform);
+        }
+
+      } else {
+
+        // @TODO: Verify citizenID token?
+
+        // Prefill the form elements
+        $form['elements']['citizenidtoken']['#default_value'] = $cookieVars['citizenidtoken'];
+        // @TODO: Replace this with a debug message using messanger.
+        if (function_exists('dpm')) {
+          dpm('Citizen ID Token: '.$cookieVars['citizenidtoken']);
+        }
+      }
+    }
+
+    // Only check case management status if case_management handler enabled.
+    $handlers = $webform->getHandlers();
+    $handlerIds = $handlers->getInstanceIds();
+    $pluginIds = [];
+    foreach ($handlerIds as $handlerId) {
+      if ($handlers->get($handlerId)->isEnabled()) {
+        $pluginIds[] = $handlers->get($handlerId)->getPluginId();
+      }
+    }
+
+    if (in_array('bhcc_case_management', $pluginIds)) {
+      $caseManagementAvalibility = \Drupal::service('bhcc_case_management.service_avaliblility');
+      $status = $caseManagementAvalibility->check();
+
+      if (!$status) {
+        _bhcc_case_management_error_redirect($webform);
+      }
+    }
+  }
+
+}
+
+/**
+ * Redirect to error page.
+ * @param  \Drupal\webform\WebformInterface $webform
+ *   The webform.
+ */
+function _bhcc_case_management_error_redirect(WebformInterface $webform) {
+
+  // If there is no token, redirect to an error page
+  $redirectErrorPage = 'bhcc_case_management.citizen_id_controller_error_webform';
+  $errorPageParameters = ['webform' => $webform->id()];
+  $errorUrl = Url::fromRoute($redirectErrorPage, $errorPageParameters);
+  $redirect = new RedirectResponse($errorUrl->toString());
+  $redirect->send();
+}

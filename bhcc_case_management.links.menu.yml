@@ -1,0 +1,6 @@
+bhcc_case_management.bhcc_case_management_config_form:
+  title: 'BHCC Case Management'
+  route_name: bhcc_case_management.bhcc_case_management_config_form
+  description: 'Configure Case Management and Citizen ID'
+  parent: system.admin_config_services
+  weight: 99

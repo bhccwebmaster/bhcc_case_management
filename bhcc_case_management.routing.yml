@@ -1,0 +1,49 @@
+bhcc_case_management.citizen_id_controller_verify:
+  path: '/citizenid-verify'
+  defaults:
+    _controller: '\Drupal\bhcc_case_management\Controller\CitizenIdController::verify'
+    _title: 'Citizen ID Confirmation'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+bhcc_case_management.citizen_id_controller_error:
+  path: '/citizenid-error'
+  defaults:
+    _controller: '\Drupal\bhcc_case_management\Controller\CitizenIdController::error'
+    _title: 'Citizen ID Error'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+bhcc_case_management.citizen_id_controller_error_webform:
+  path: '/citizenid-error/{webform}'
+  defaults:
+    _controller: '\Drupal\bhcc_case_management\Controller\CitizenIdController::errorWebform'
+    _title_callback: '\Drupal\bhcc_case_management\Controller\CitizenIdController::errorWebformTitle'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+    parameters:
+      webform:
+        type: entity:webform
+bhcc_case_management.bhcc_case_management_config_form:
+  path: '/admin/config/services/bhcc-bhcc_case_management'
+  defaults:
+    _form: '\Drupal\bhcc_case_management\Form\ConfigForm'
+    _title: 'BHCC Case Management Configuration'
+  requirements:
+    _permission: 'access case management configuration'
+  options:
+    _admin_route: TRUE
+
+bhcc_case_management.case_management_covid_file_retrive_controller_retrive:
+  path: '/cm-retrive-file'
+  defaults:
+    _controller: '\Drupal\bhcc_case_management\Controller\CaseManagementCovidFileRetriveController::retrive'
+    _title: 'Retrive'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE

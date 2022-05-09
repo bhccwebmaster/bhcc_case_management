@@ -1,0 +1,8 @@
+access case management configuration:
+  title: 'Access Case Management Configuration'
+  description: 'Allow configuration of Case Management and Citizen ID Service endpoints.'
+  restrict access: TRUE
+
+bypass citizen id check:
+  title: 'Bypass Citizen ID check on webforms'
+  description: 'Allow access to a webform that normally requires Citizen ID.'

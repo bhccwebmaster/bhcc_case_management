@@ -1,0 +1,10 @@
+webform.handler.bhcc_document:
+  type: mapping
+  label: 'Case management document uploader'
+  mapping:
+    zip_directory:
+      label: 'Directory'
+      type: string
+    zip_filename:
+      label: 'Filename'
+      type: string

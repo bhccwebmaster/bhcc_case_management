@@ -1,0 +1,31 @@
+webform.handler.bhcc_document:
+  type: mapping
+  label: 'Case management document uploader'
+  mapping:
+    id:
+      label: 'ID'
+      type: string
+    label:
+      label: 'Label'
+      type: string
+    handler_id:
+      label: 'Handler ID'
+      type: string
+    status:
+      label: 'Status'
+      type: boolean
+    conditions:
+      label: 'Conditions'
+      type: array
+    weight:
+      label: 'Weight'
+      type: integer
+    settings:
+      label: 'Settings'
+      mapping:
+        zip_directory:
+          label: 'Directory'
+          type: string
+        zip_filename:
+          label: 'Filename'
+          type: string
