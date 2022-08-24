@@ -1,7 +1,7 @@
 name: 'BHCC Case Management'
 type: module
 description: 'Case Management and Citizen ID Intergration'
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9 || ^10
 package: 'BHCC Webform'
 dependencies:
   - webform:webform
