@@ -98,7 +98,7 @@ class ElectoralServicesWebformHandler extends WebformHandlerBase {
       if ($rename) {
 
         $flagDestination = $sftp . $fileName . ".FLAG";
-        $fileSaveData = writeData( $email . PHP_EOL . $fileNameExt, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
+        $fileSaveData = \Drupal::service('file.repository')->writeData( $email . PHP_EOL . $fileNameExt, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
 
         // Display error message if fileSaveData returns false
         if (!$fileSaveData) {

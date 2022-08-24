@@ -139,7 +139,7 @@ class CovidFundWebformHandler extends WebformHandlerBase {
       $flagDestination = $sftp . $uniqueId . ".FLAG";
 
       // Generate flag file and populate flag file with email, unique ID and zip filename
-      $fileSaveData = writeData( $email . PHP_EOL . $uniqueId . '.zip' . PHP_EOL . $uniqueId, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
+      $fileSaveData = \Drupal::service('file.repository')->writeData( $email . PHP_EOL . $uniqueId . '.zip' . PHP_EOL . $uniqueId, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
 
       // Copy to new location - @todo reverse these so only the copies are managed as boomi ones get deleted.
       $copiedfile = $file_system->copy($zipUri, self::GRANT_FOLDER . $uniqueId . '.zip');
