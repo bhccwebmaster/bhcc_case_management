@@ -4,24 +4,14 @@ namespace Drupal\Tests\bhcc_case_management\Unit\Plugin\WebformHandler;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
-use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\RedirectCommand;
-use Drupal\webform\Ajax\WebformRefreshCommand;
-use Drupal\webform\Ajax\WebformSubmissionAjaxResponse;
 use Drupal\Core\Url;
-use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
 use Drupal\webform\WebformSubmissionInterface;
 use Drupal\webform\WebformMessageManagerInterface;
-use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\bhcc_case_management\Plugin\WebformHandler\CaseManagementPostWebformHandler;
 use Drupal\webform\WebformTokenManagerInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -37,72 +27,84 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
 
   /**
    * This is what we are testing.
+   *
    * @var Drupal\bhcc_case_management\Plugin\WebformHandler\CaseManagementPostWebformHandler
    */
   protected $test_target;
 
   /**
    * Webform configuration.
-   * @var Array
+   *
+   * @var array
    */
   protected $configuration;
 
   /**
    * Plugin ID.
+   *
    * @var string
    */
   protected $plugin_id;
 
   /**
    * Plugin Definition.
+   *
    * @var mixed
    */
   protected $plugin_definition;
 
   /**
    * Logger factory.
+   *
    * @var Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
   protected $logger_factory;
 
   /**
    * Config factory.
+   *
    * @var Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $config_factory;
 
   /**
    * Entity type manager.
+   *
    * @var Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entity_type_manager;
 
   /**
    * Conditions validator.
+   *
    * @var Drupal\webform\WebformSubmissionConditionsValidatorInterface
    */
   protected $conditions_validator;
 
   /**
    * Http client.
+   *
    * @var GuzzleHttp\ClientInterface
    */
   protected $http_client;
 
   /**
    * Message manager.
+   *
    * @var Drupal\webform\WebformMessageManagerInterface
    */
   protected $message_manager;
 
   /**
    * Webform token manager.
+   *
    * @var Drupal\webform\WebformTokenManagerInterface
    */
   protected $webform_token_manager;
 
   /**
    * Entity field manager.
+   *
    * @var Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $entity_field_manager;
@@ -129,8 +131,10 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
 
   /**
    * Mock a basic (null) object.
-   * @param  Class $objectClass
+   *
+   * @param Class $objectClass
    *   A class / interface to mock.
+   *
    * @return Object
    *   Mock object.
    */
@@ -162,13 +166,15 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
   }
 
   /**
-   * Mock Webform submission class
-   * @param  Array $submission_data
+   * Mock Webform submission class.
+   *
+   * @param array $submission_data
    *   Webform submission array in form key => value.
-   * @return WebformSubmissionInterface
+   *
+   * @return \Drupal\webform\WebformSubmissionInterface
    *   Webform submission mock object.
    */
-  protected function mockWebformSubmission($submission_data = []) {
+  protected function mockWebformSubmission(array $submission_data = []) {
     $webform_submission = $this->basicMockObject(WebformSubmissionInterface::class);
     $webform_submission->expects($this->once())
       ->method('getData')
@@ -178,16 +184,18 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
   }
 
   /**
-   * Mock Webform class
-   * @param  string $id
+   * Mock Webform class.
+   *
+   * @param string $id
    *   Webform ID.
-   * @param  string $title
+   * @param string $title
    *   Webform title.
-   * @param  string $path
+   * @param string $path
    *   Webform path.
-   * @param  string $category
+   * @param string $category
    *   Webform category.
-   * @return WebformInterface
+   *
+   * @return \Drupal\webform\WebformInterface
    *   Mock webform object.
    */
   protected function mockWebform($id, $title, $path, $category) {
@@ -218,13 +226,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
   }
 
   /**
-   * Mock Webform element
-   * @param  Array $webform_elements
+   * Mock Webform element.
+   *
+   * @param array $webform_elements
    *   Webform elements array, asscoiative array as the webform tree would be.
-   * @param  WebformInterface &$webform
+   * @param \Drupal\webform\WebformInterface &$webform
    *   (By reference) Existing webform mock object to add the elements to.
    */
-  protected function mockWebformElement($webform_elements, &$webform) {
+  protected function mockWebformElement(array $webform_elements, &$webform) {
     $map = [];
     foreach ($webform_elements as $key => $element) {
       // Need to include false paremter here as used in the original class.
@@ -243,7 +252,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    */
   public function testHasDocumentFiles() {
 
-    // Set up casekey
+    // Set up casekey.
     $case_key = $this->randomMachineName(16);
 
     // Basic submission data.
@@ -271,9 +280,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method->setAccessible(TRUE);
     // Use invokeArgs as need to pass webform_values by refernece.
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
-    $result = $method->invokeArgs($this->test_target, [&$submission_data, $webform]);
+    $result = $method->invokeArgs(
+        $this->test_target,
+        [
+          &$submission_data,
+          $webform,
+        ]);
 
-    // Assert that this is a simple case
+    // Assert that this is a simple case.
     $this->assertTrue($result);
 
     // Assert casekey is still present.
@@ -289,7 +303,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    */
   public function testHasNoDocumentFiles() {
 
-    // Set up casekey
+    // Set up casekey.
     $case_key = $this->randomMachineName(16);
 
     // Basic submission data.
@@ -317,9 +331,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method->setAccessible(TRUE);
     // Use invokeArgs as need to pass webform_values by refernece.
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
-    $result = $method->invokeArgs($this->test_target, [&$submission_data, $webform]);
+    $result = $method->invokeArgs(
+      $this->test_target,
+      [
+        &$submission_data,
+        $webform,
+      ]);
 
-    // Assert that this is a simple case
+    // Assert that this is a simple case.
     $this->assertFalse($result);
 
     // Assert casekey is not present.
@@ -333,7 +352,13 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    * and expect them to be transformed into newline seperated values.
    */
   public function testHandleElementSimpleCaseWithSimpleArray() {
-    $webform_value = ['Answer one', 'Answer two', 'Answer three', 'Answer four', 'Answer_five'];
+    $webform_value = [
+      'Answer one',
+      'Answer two',
+      'Answer three',
+      'Answer four',
+      'Answer_five',
+    ];
     $expected_transform = "Answer one\nAnswer two\nAnswer three\nAnswer four\nAnswer_five";
 
     // Turn protected method into public method.
@@ -343,7 +368,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
     $result = $method->invokeArgs($this->test_target, [&$webform_value]);
 
-    // Assert that this is a simple case
+    // Assert that this is a simple case.
     $this->assertTrue($result);
 
     // Assert the webform value was changed.
@@ -362,7 +387,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $webform_value = [
       'key one' => 'Answer one',
       'key two' => 'Answer two',
-      'key three' => ['Answer three', 'Answer four', 'Answer_five']
+      'key three' => ['Answer three', 'Answer four', 'Answer_five'],
     ];
     $expected_transform = $webform_value;
 
@@ -371,7 +396,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method->setAccessible(TRUE);
     $result = $method->invokeArgs($this->test_target, [&$webform_value]);
 
-    // Assert that this is a simple case
+    // Assert that this is a simple case.
     $this->assertFalse($result);
 
     // Assert the webform value was not changed.
@@ -398,15 +423,18 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [&$webform_value, $webform_element]);
+    $result = $method->invokeArgs($this->test_target, [
+      &$webform_value,
+      $webform_element,
+    ]);
 
-    // Assert that this is a special case
+    // Assert that this is a special case.
     $this->assertTrue($result);
 
     // Assert the webform value was changed.
     $this->assertEquals($webform_value, $expected_transform);
 
-    // Also test with bhcc_webform_date_of_birth
+    // Also test with bhcc_webform_date_of_birth.
     $webform_value_dob = [
       'day' => '01',
       'month' => '02',
@@ -416,9 +444,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $webform_element_dob = [
       '#type' => 'bhcc_webform_date_of_birth',
     ];
-    $result = $method->invokeArgs($this->test_target, [&$webform_value_dob, $webform_element_dob]);
+    $result = $method->invokeArgs(
+      $this->test_target,
+      [
+        &$webform_value_dob,
+        $webform_element_dob,
+      ]);
 
-    // Assert that this is a special case
+    // Assert that this is a special case.
     $this->assertTrue($result);
 
     // Assert the webform value was changed.
@@ -458,9 +491,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [&$webform_value, $webform_element]);
+    $result = $method->invokeArgs(
+      $this->test_target,
+      [
+        &$webform_value,
+        $webform_element,
+      ]);
 
-    // Assert that this is a special case
+    // Assert that this is a special case.
     $this->assertTrue($result);
 
     // Assert the webform value was changed.
@@ -488,9 +526,14 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [&$webform_value, $webform_element]);
+    $result = $method->invokeArgs(
+      $this->test_target,
+      [
+        &$webform_value,
+        $webform_element,
+      ]);
 
-    // Assert that this is not a special case
+    // Assert that this is not a special case.
     $this->assertFalse($result);
 
     // Assert the webform value was not changed.
@@ -606,7 +649,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         'simple_question_three' => [
           '#title' => 'Simple question three',
         ],
-      ]
+      ],
     ];
 
     $expected = [
@@ -672,7 +715,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         'simple_question_three' => [
           '#title' => 'Simple question three',
         ],
-      ]
+      ],
     ];
 
     $expected = [
@@ -742,6 +785,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    *
    * We provide an addresslookup array with the defined element types
    * and expect a composite to be returned like using an address field.
+   *
    * @todo move this to the address_lookup element, and test it is invoked.
    */
   public function testHandleElementSpecialCaseAddressLookup() {
@@ -794,15 +838,20 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
             '#title' => 'Postcode',
           ],
         ],
-      ]
+      ],
     ];
 
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleCompositeElementSpecialCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [&$webform_value, $webform_element]);
+    $result = $method->invokeArgs(
+      $this->test_target,
+      [
+        &$webform_value,
+        $webform_element,
+      ]);
 
-    // Assert that this is a special case
+    // Assert that this is a special case.
     $this->assertTrue($result);
 
     // Assert the webform value was changed.
@@ -850,7 +899,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         'simple_question_three' => [
           '#title' => 'Simple question three',
         ],
-      ]
+      ],
     ];
 
     $expected = [
@@ -1043,7 +1092,11 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
   protected function getFullTestSubmissionData() {
     return [
       'simple_question' => 'Simple answer',
-      'multiple_question' => ['Multiple answer one', 'Multiple answer two', 'Multiple answer three'],
+      'multiple_question' => [
+        'Multiple answer one',
+        'Multiple answer two',
+        'Multiple answer three',
+      ],
       'date_question' => [
         'day'   => '01',
         'month' => '02',
@@ -1224,7 +1277,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         [
           'question'     => 'Upload a document',
           'answer'       => '1',
-          'machine_name' => 'upload_a_document'
+          'machine_name' => 'upload_a_document',
         ],
         [
           'question'     => 'Service',
@@ -1234,7 +1287,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         [
           'question'     => 'CaseKey',
           'answer'       => 'qwertyuiopasdfghjklzxcvbnm',
-          'machine_name' => 'casekey'
+          'machine_name' => 'casekey',
         ],
       ],
     ];
