@@ -110,7 +110,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
   /**
    * Set up mock objects.
    */
-  public function setUp() {
+  public function setUp(): void {
 
     $this->mockServicesContainer();
 
@@ -1330,6 +1330,10 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
       'casekey' => [
         '#type' => 'value',
         '#title' => 'CaseKey',
+      ],
+      'citizenidtoken' => [
+        '#type' => 'value',
+        '#title' => 'citizenidtoken',
       ],
     ];
   }
