@@ -115,17 +115,17 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $webform->save();
 
     // Create a new submission.
-    $sid = $this->postSubmissionTest($webform);
+    $this->postSubmissionTest($webform);
 
     // Assert Zip file is created.
-    $this->assertFileExists($this->fileSystem ->realpath($test_dir) . '/' . $test_file . '.zip');
+    $this->assertFileExists($this->fileSystem->realpath($test_dir) . '/' . $test_file . '.zip');
 
     // Assert the Flag file is created.
-    $this->assertFileExists($this->fileSystem ->realpath($test_dir) . '/' . $test_file . '.FLAG');
+    $this->assertFileExists($this->fileSystem->realpath($test_dir) . '/' . $test_file . '.FLAG');
 
-    // Assert flag file contains the filename and the key
+    // Assert flag file contains the filename and the key.
     $expected_flag_content = $test_file . '.zip' . PHP_EOL . $test_file;
-    $flag_contents = file_get_contents($this->fileSystem ->realpath($test_dir) . '/' . $test_file . '.FLAG');
+    $flag_contents = file_get_contents($this->fileSystem->realpath($test_dir) . '/' . $test_file . '.FLAG');
     $this->assertEquals($expected_flag_content, $flag_contents);
 
   }
@@ -133,12 +133,12 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
   /**
    * Test the document uploader webform using tokens for the filename.
    */
-   public function testDocumentUploadHandlerWithTokens() {
+  public function testDocumentUploadHandlerWithTokens() {
 
     // Login as admin.
     $this->drupalLogin($this->rootUser);
 
-    // Set up test directory and file
+    // Set up test directory and file.
     $test_dir = 'private://test';
     $test_file = '[webform_submission:values:casekey]';
 
@@ -173,17 +173,17 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $webform->save();
 
     // Create a new submission.
-    $sid = $this->postSubmissionTest($webform);
+    $this->postSubmissionTest($webform);
 
     // Assert Zip file is created.
-    $this->assertFileExists($this->fileSystem ->realpath($test_dir) . '/' . $casekey . '.zip');
+    $this->assertFileExists($this->fileSystem->realpath($test_dir) . '/' . $casekey . '.zip');
 
     // Assert the Flag file is created.
-    $this->assertFileExists($this->fileSystem ->realpath($test_dir) . '/' . $casekey . '.FLAG');
+    $this->assertFileExists($this->fileSystem->realpath($test_dir) . '/' . $casekey . '.FLAG');
 
-    // Assert flag file contains the filename and the key
+    // Assert flag file contains the filename and the key.
     $expected_flag_content = $casekey . '.zip' . PHP_EOL . $casekey;
-    $flag_contents = file_get_contents($this->fileSystem ->realpath($test_dir) . '/' . $casekey . '.FLAG');
+    $flag_contents = file_get_contents($this->fileSystem->realpath($test_dir) . '/' . $casekey . '.FLAG');
     $this->assertEquals($expected_flag_content, $flag_contents);
 
   }
@@ -191,12 +191,12 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
   /**
    * Test the document uploader webform.
    */
-   public function testDocumentUploadHandlerWithMultiple() {
+  public function testDocumentUploadHandlerWithMultiple() {
 
     // Login as admin.
     $this->drupalLogin($this->rootUser);
 
-    // Set up test directory and file
+    // Set up test directory and file.
     $test_dir = 'private://test';
     $test_file = 'uploaded-documents';
 
@@ -214,7 +214,7 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
       'more_documents' => [
         '#type' => 'webform_document_file',
         '#title' => 'More documents',
-        '#multiple' => TRUE
+        '#multiple' => TRUE,
       ],
     ];
 
@@ -247,7 +247,6 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $zip->extract($extract_root);
 
     // Check the files submitted are present in the extracted zip.
-
     // Load the file.
     $document_file = File::load($submission_data['document']);
     $document_filename = $document_file->getFilename();
@@ -268,7 +267,7 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $another_document_in_zip_contents = file_get_contents($extract_root . '/another_document/' . $another_document_filename);
     $this->assertEquals($another_document_contents, $another_document_in_zip_contents);
 
-    // Multiple files
+    // Multiple files.
     foreach ($submission_data['more_documents'] as $more_file) {
       $more_document_file = File::load($more_file);
       $more_document_filename = $more_document_file->getFilename();
@@ -279,4 +278,5 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     }
 
   }
+
 }
