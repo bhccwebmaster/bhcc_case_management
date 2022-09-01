@@ -34,11 +34,13 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
   protected $fileSystem;
 
   /**
-   * Get documument upload handler settings
-   * @param  string $test_dir
+   * Get documument upload handler settings.
+   *
+   * @param string $test_dir
    *   The test zip directory for config.
-   * @param  string $test_file
+   * @param string $test_file
    *   The test zip filename for config.
+   *
    * @return Drupal\bhcc_case_management\Plugin\WebformHandler\CaseManagementDocumentHandler
    *   Document uploader handler.
    */
@@ -67,21 +69,24 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
+
     parent::setUp();
+
     // @todo dependency inject file system service.
     $this->fileSystem = \Drupal::service('file_system');
-  }
 
+  }
 
   /**
    * Test the document uploader webform.
    */
   public function testDocumentUploadHandler() {
+
     // Login as admin.
     $this->drupalLogin($this->rootUser);
 
-    // Set up test directory and file
+    // Set up test directory and file.
     $test_dir = 'private://test';
     $test_file = 'uploaded-documents';
 
@@ -122,12 +127,14 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $expected_flag_content = $test_file . '.zip' . PHP_EOL . $test_file;
     $flag_contents = file_get_contents($this->fileSystem ->realpath($test_dir) . '/' . $test_file . '.FLAG');
     $this->assertEquals($expected_flag_content, $flag_contents);
+
   }
 
   /**
    * Test the document uploader webform using tokens for the filename.
    */
-  public function testDocumentUploadHandlerWithTokens() {
+   public function testDocumentUploadHandlerWithTokens() {
+
     // Login as admin.
     $this->drupalLogin($this->rootUser);
 
@@ -178,12 +185,14 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
     $expected_flag_content = $casekey . '.zip' . PHP_EOL . $casekey;
     $flag_contents = file_get_contents($this->fileSystem ->realpath($test_dir) . '/' . $casekey . '.FLAG');
     $this->assertEquals($expected_flag_content, $flag_contents);
+
   }
 
   /**
    * Test the document uploader webform.
    */
-  public function testDocumentUploadHandlerWithMultiple() {
+   public function testDocumentUploadHandlerWithMultiple() {
+
     // Login as admin.
     $this->drupalLogin($this->rootUser);
 
@@ -268,5 +277,6 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
       $more_document_in_zip_contents = file_get_contents($extract_root . '/more_documents/' . $more_document_filename);
       $this->assertEquals($more_document_contents, $more_document_in_zip_contents);
     }
+
   }
 }

@@ -1,0 +1,13 @@
+bhcc_case_management.*:
+  type: config_entity
+  label: 'bhcc_case_management record config'
+  mapping:
+    citizen_id_service_url:
+      label: 'Citizen id service url'
+      type: string
+    case_management_post_url:
+      label: 'Case management post url'
+      type: string
+    case_management_auth_header:
+      label: 'Case management auth header'
+      type: string
