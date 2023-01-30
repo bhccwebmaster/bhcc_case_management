@@ -1,0 +1,12 @@
+bhcc_case_management.bhcc_case_management_config_form:
+  title: 'Configuration'
+  route_name: bhcc_case_management.bhcc_case_management_config_form
+  base_route: bhcc_case_management.bhcc_case_management_config_form
+  weight: 1
+
+# Contact management groups collection
+entity.bhcc_contact_management_group.collection:
+  title: 'Contact management groups'
+  route_name: entity.bhcc_contact_management_group.collection
+  base_route: bhcc_case_management.bhcc_case_management_config_form
+  weight: 2

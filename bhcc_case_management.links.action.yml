@@ -1,0 +1,5 @@
+entity.bhcc_contact_management_group.add_form:
+  route_name: entity.bhcc_contact_management_group.add_form
+  title: 'Add Contact management group'
+  appears_on:
+    - entity.bhcc_contact_management_group.collection

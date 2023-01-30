@@ -6,3 +6,7 @@ access case management configuration:
 bypass citizen id check:
   title: 'Bypass Citizen ID check on webforms'
   description: 'Allow access to a webform that normally requires Citizen ID.'
+
+# Contact start group entity
+manage contact management groups:
+  title: 'Create and edit contact management groups'
