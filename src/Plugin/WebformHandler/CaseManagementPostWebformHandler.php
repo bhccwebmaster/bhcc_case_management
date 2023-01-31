@@ -55,12 +55,21 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   protected $messageManager;
 
   /**
+   * The Entity type manager service.
+   * 
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->httpClient =   $container->get('http_client');
     $instance->messageManager = $container->get('webform.message_manager');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+
     return $instance;
   }
 
@@ -75,6 +84,8 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
     // Default values for overrides (blank)
     return [
+      'contact_management_group' => '',
+      'enable_override' => 0,
       'override_case_management_post_url'    => '',
       'override_case_management_auth_header' => '',
     ];
@@ -86,10 +97,36 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $webform = $this->getWebform();
 
+    // Get Contact management groups.
+    $cm_group_storage = $this->entityTypeManager
+      ->getStorage('bhcc_contact_management_group');
+    $cm_group_ids = $cm_group_storage->getQuery()
+      ->execute();
+    $cm_groups = array_map(function ($id) use ($cm_group_storage) {
+      return $cm_group_storage->load($id)->label();
+    }, $cm_group_ids);
+
     // Case Management web service overrides.
     $form['case_management'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Override case management settings'),
+    ];
+
+    // Contact management group select.
+    $form['case_management']['contact_management_group'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Contact management group'),
+      '#options' => $cm_groups,
+      '#default_value' => $this->configuration['contact_management_group'],
+      '#empty_option' => $this->t('- No group -'),
+      '#empty_value' => '',
+    ];
+
+    // Override contact management.
+    $form['case_management']['enable_override'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Override Contact management endpoints.'),
+      '#default_value' => $this->configuration['enable_override'],
     ];
     $form['case_management']['override_case_management_post_url'] = [
       '#type' => 'textfield',
@@ -617,6 +654,22 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
+   * Get the Contact management group entity.
+   * 
+   * @return \Drupal\bhcc_case_management\Entity\ContactManagementGroupEntityInterface|NULL
+   *   Contact management group entity, or NULL if not set.
+   */
+  protected function getContactManagementGroup() {
+    $cm_group_id = $this->configuration['contact_management_group'];
+    if ($cm_group_id) {
+      $cm_group = $this->entityTypeManager
+        ->getStorage('bhcc_contact_management_group')
+        ->load($cm_group_id);
+    }
+    return $cm_group ?? NULL;
+  }
+
+  /**
    * Get default case management url
    * @return string
    *   Default URL used for posting into case management.
@@ -634,8 +687,15 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    */
   protected function getCaseManagementUrl() {
     $default = $this->getDefaultCaseManagementUrl();
+
+    // Get the Contact management group post URL if set.
+    $cm_group = $this->getContactManagementGroup();
+    if ($cm_group) {
+      $cm = $cm_group->getPostUrl();
+    }
+
     $override = $this->configuration['override_case_management_post_url'];
-    return !empty($override) ? $override : $default;
+    return (!empty($override) ? $override : (!empty($cm) ? $cm : $default));
   }
 
   /**
@@ -656,8 +716,15 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    */
   protected function getCaseManagementAuthHeader() {
     $default = $this->getDefaultCaseManagementAuthHeader();
+
+    // Get the Contact management group auth header.
+    $cm_group = $this->getContactManagementGroup();
+    if ($cm_group) {
+      $cm = $cm_group->getAuthHeader();
+    }
+
     $override = $this->configuration['override_case_management_auth_header'];
-    return !empty($override) ? $override : $default;
+    return (!empty($override) ? $override : (!empty($cm) ? $cm : $default));
   }
 
   // Helper functions copied from RemotePostWebformHandler.
