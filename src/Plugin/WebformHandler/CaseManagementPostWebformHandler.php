@@ -56,7 +56,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * The Entity type manager service.
-   * 
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
@@ -663,7 +663,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Get the Contact management group entity.
-   * 
+   *
    * @return \Drupal\bhcc_case_management\Entity\ContactManagementGroupEntityInterface|NULL
    *   Contact management group entity, or NULL if not set.
    */

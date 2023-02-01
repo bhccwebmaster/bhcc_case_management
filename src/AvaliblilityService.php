@@ -71,7 +71,7 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
           $authHeader = $settings['override_case_management_auth_header'];
         }
 
-        // Check form group.
+        // Check CM group.
         elseif ($settings['contact_management_group']) {
           $cm_group_id = $settings['contact_management_group'];
           if ($cm_group_id) {

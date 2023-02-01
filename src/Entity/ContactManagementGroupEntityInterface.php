@@ -21,7 +21,7 @@ interface ContactManagementGroupEntityInterface extends ConfigEntityInterface {
 
   /**
    * Get the Contact manaagement post url.
-   * 
+   *
    * @return String|NULL
    *   Post url to use.
    */
@@ -39,7 +39,7 @@ interface ContactManagementGroupEntityInterface extends ConfigEntityInterface {
 
   /**
    * Get the auth header.
-   * 
+   *
    * @return String|NULL
    *   Auth header to use.
    */
