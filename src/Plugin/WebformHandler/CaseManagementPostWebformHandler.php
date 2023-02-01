@@ -106,10 +106,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       return $cm_group_storage->load($id)->label();
     }, $cm_group_ids);
 
-    // Case Management web service overrides.
+    // Contact management web service settings.
     $form['case_management'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Override case management settings'),
+      '#title' => $this->t('Contact management settings'),
     ];
 
     // Contact management group select.
@@ -130,11 +130,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     ];
     $form['case_management']['override_case_management_post_url'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Case management service post URL'),
-      '#description' => $this->t('The URL to post form responses into case management.'),
+      '#title' => $this->t('Contact management service post URL'),
+      '#description' => $this->t('The URL to post form responses into Contact management.'),
       '#size' => 64,
       '#default_value' => $this->configuration['override_case_management_post_url'],
-      '#placeholder' => $this->getDefaultCaseManagementUrl(),
       '#states' => [
         'required' => [
           ':input[name="settings[enable_override]"]' => ['checked' => TRUE],
@@ -143,11 +142,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     ];
     $form['case_management']['override_case_management_auth_header'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Case management service authorization header'),
-      '#description' => $this->t('The header to add to authorize posts to case management.'),
+      '#title' => $this->t('Contact management service authorization header'),
+      '#description' => $this->t('The header to add to authorize posts to Contact management.'),
       '#size' => 64,
       '#default_value' => $this->configuration['override_case_management_auth_header'],
-      '#placeholder' => $this->getDefaultCaseManagementAuthHeader(),
       '#states' => [
         'required' => [
           ':input[name="settings[enable_override]"]' => ['checked' => TRUE],
