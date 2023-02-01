@@ -135,6 +135,11 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       '#size' => 64,
       '#default_value' => $this->configuration['override_case_management_post_url'],
       '#placeholder' => $this->getDefaultCaseManagementUrl(),
+      '#states' => [
+        'required' => [
+          ':input[name="settings[enable_override]"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
     $form['case_management']['override_case_management_auth_header'] = [
       '#type' => 'textfield',
@@ -143,6 +148,11 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       '#size' => 64,
       '#default_value' => $this->configuration['override_case_management_auth_header'],
       '#placeholder' => $this->getDefaultCaseManagementAuthHeader(),
+      '#states' => [
+        'required' => [
+          ':input[name="settings[enable_override]"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     // $this->elementTokenValidate($form);
@@ -694,8 +704,12 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       $cm = $cm_group->getPostUrl();
     }
 
+    $enable_override = $this->configuration['enable_override'];
     $override = $this->configuration['override_case_management_post_url'];
-    return (!empty($override) ? $override : (!empty($cm) ? $cm : $default));
+
+    // If override is enabled, return the override, 
+    // else the cm group, else the default.
+    return (!empty($enable_override) ? $override : (!empty($cm) ? $cm : $default));
   }
 
   /**
@@ -723,8 +737,12 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       $cm = $cm_group->getAuthHeader();
     }
 
+    $enable_override = $this->configuration['enable_override'];
     $override = $this->configuration['override_case_management_auth_header'];
-    return (!empty($override) ? $override : (!empty($cm) ? $cm : $default));
+
+    // If override is enabled, return the override, 
+    // else the cm group, else the default.
+    return (!empty($enable_override) ? $override : (!empty($cm) ? $cm : $default));
   }
 
   // Helper functions copied from RemotePostWebformHandler.
