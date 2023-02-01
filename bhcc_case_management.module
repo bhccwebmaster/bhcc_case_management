@@ -84,7 +84,7 @@ function bhcc_case_management_form_alter(&$form, FormStateInterface $form_state,
 
     if (in_array('bhcc_case_management', $pluginIds)) {
       $caseManagementAvalibility = \Drupal::service('bhcc_case_management.service_avaliblility');
-      $status = $caseManagementAvalibility->check();
+      $status = $caseManagementAvalibility->check($webform);
 
       if (!$status) {
         _bhcc_case_management_error_redirect($webform);
