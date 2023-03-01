@@ -1,20 +1,19 @@
 <?php
 
-use Drupal\webform\WebformInterface;
+/**
+ * @file
+ * Contains bhcc_case_management update hooks.
+ */
+
 use Drupal\webform\Entity\Webform;
 
 /**
- * @file
- * Contains bhcc_case_management update hooks
- */
-
- /**
  * Update webforms to explicitly set they override Contact management endpoints.
  */
 function bhcc_case_management_update_8001(&$sandbox) {
 
   if (!isset($sandbox['total'])) {
-    
+
     // Fetch all webform IDs.
     $sandbox['webforms'] = array_values(\Drupal::service('entity_type.manager')
       ->getStorage('webform')
@@ -31,27 +30,27 @@ function bhcc_case_management_update_8001(&$sandbox) {
     if (isset($sandbox['webforms'][$i])) {
       $webform = Webform::load($sandbox['webforms'][$i]);
 
-        // Check if webform has contact management handler
-        $handlers = $webform->getHandlers();
-        $handler_ids = $handlers->getInstanceIds();
-        foreach ($handler_ids as $handler_id) {
-          $handler = $handlers->get($handler_id);
-          $plugin_id = $handler->getPluginId();
+      // Check if webform has contact management handler.
+      $handlers = $webform->getHandlers();
+      $handler_ids = $handlers->getInstanceIds();
+      foreach ($handler_ids as $handler_id) {
+        $handler = $handlers->get($handler_id);
+        $plugin_id = $handler->getPluginId();
 
-          // If this is a CM handler, and the post_url and auth_header are set,
-          // we can assume they are meant to be overridden and 
-          // set enable_override for this handler.
-          if ($plugin_id == 'bhcc_case_management') {
-            $settings = $handler->getSettings();
-            $post_url = $settings['override_case_management_post_url'];
-            $auth_header = $settings['override_case_management_auth_header'];
-            if ($post_url && $auth_header) {
-              $handler->setSetting('enable_override', 1);
-              $webform->updateWebformHandler($handler);
-              $webform->save();
-            }
+        // If this is a CM handler, and the post_url and auth_header are set,
+        // we can assume they are meant to be overridden and
+        // set enable_override for this handler.
+        if ($plugin_id == 'bhcc_case_management') {
+          $settings = $handler->getSettings();
+          $post_url = $settings['override_case_management_post_url'];
+          $auth_header = $settings['override_case_management_auth_header'];
+          if ($post_url && $auth_header) {
+            $handler->setSetting('enable_override', 1);
+            $webform->updateWebformHandler($handler);
+            $webform->save();
           }
         }
+      }
     }
     $sandbox['current']++;
   }
@@ -62,4 +61,13 @@ function bhcc_case_management_update_8001(&$sandbox) {
   else {
     $sandbox['#finished'] = ($sandbox['current'] / $sandbox['total']);
   }
+}
+
+/**
+ * Install the case management group entity.
+ */
+function bhcc_case_management_update_8002() {
+  \Drupal::entityDefinitionUpdateManager()->installEntityType(
+    \Drupal::entityTypeManager()->getDefinition('bhcc_contact_management_group')
+  );
 }

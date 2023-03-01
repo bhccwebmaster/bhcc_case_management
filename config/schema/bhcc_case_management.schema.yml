@@ -1,4 +1,4 @@
-bhcc_case_management.*:
+bhcc_case_management.settings:
   type: config_entity
   label: 'bhcc_case_management record config'
   mapping:
@@ -10,4 +10,22 @@ bhcc_case_management.*:
       type: string
     case_management_auth_header:
       label: 'Case management auth header'
+      type: string
+bhcc_case_management.bhcc_contact_management_group.*:
+  type: config_entity
+  label: 'Contact management group'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    name:
+      type: label
+      label: 'Name'
+    post_url:
+      type: string
+      label: 'Post URL'
+    auth_header:
+      type: string
+      label: 'Auth header'
+    uuid:
       type: string
