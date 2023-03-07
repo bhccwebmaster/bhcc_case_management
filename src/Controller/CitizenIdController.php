@@ -86,6 +86,11 @@ class CitizenIdController extends ControllerBase {
       // Do direct redirect as this overrides the destination paremeter.
       $response = new RedirectResponse('/citizenid-error');
       $response->send();
+
+      // Still have to return from the controller.
+      // @see DRUP-1155
+      // @see https://github.com/bhccwebmaster/bhcclocalgov/issues/1253
+      return $response;
     }
 
     // Definately not the Drupal way of doing things!!!
