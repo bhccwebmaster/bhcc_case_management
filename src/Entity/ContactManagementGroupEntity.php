@@ -127,5 +127,4 @@ class ContactManagementGroupEntity extends ConfigEntityBase implements ContactMa
     return $this->auth_header;
   }
 
-
 }

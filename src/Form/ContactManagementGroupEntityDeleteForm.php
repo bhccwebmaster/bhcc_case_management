@@ -5,7 +5,6 @@ namespace Drupal\bhcc_case_management\Form;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Builds the form to delete Contact management group entities.

@@ -27,6 +27,13 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
   public static $modules = ['webform', 'file', 'bhcc_case_management'];
 
   /**
+   * Theme to enable.
+   *
+   * @var array
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * File system service.
    *
    * @var Drupal\Core\File\FileSystemInterface

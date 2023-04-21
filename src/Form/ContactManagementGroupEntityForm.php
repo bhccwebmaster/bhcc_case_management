@@ -41,7 +41,6 @@ class ContactManagementGroupEntityForm extends EntityForm {
       '#disabled' => !$contact_management_group->isNew(),
     ];
 
-
     $form['post_url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Contact management service post URL'),

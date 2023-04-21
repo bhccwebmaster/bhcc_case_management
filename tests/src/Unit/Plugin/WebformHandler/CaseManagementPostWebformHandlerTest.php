@@ -30,7 +30,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    *
    * @var Drupal\bhcc_case_management\Plugin\WebformHandler\CaseManagementPostWebformHandler
    */
-  protected $test_target;
+  protected $testTarget;
 
   /**
    * Webform configuration.
@@ -44,70 +44,70 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    *
    * @var string
    */
-  protected $plugin_id;
+  protected $pluginId;
 
   /**
    * Plugin Definition.
    *
    * @var mixed
    */
-  protected $plugin_definition;
+  protected $pluginDefinition;
 
   /**
    * Logger factory.
    *
    * @var Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
-  protected $logger_factory;
+  protected $loggerFactory;
 
   /**
    * Config factory.
    *
    * @var Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $config_factory;
+  protected $configFactory;
 
   /**
    * Entity type manager.
    *
    * @var Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entity_type_manager;
+  protected $entityTypeManager;
 
   /**
    * Conditions validator.
    *
    * @var Drupal\webform\WebformSubmissionConditionsValidatorInterface
    */
-  protected $conditions_validator;
+  protected $conditionsValidator;
 
   /**
    * Http client.
    *
    * @var GuzzleHttp\ClientInterface
    */
-  protected $http_client;
+  protected $httpClient;
 
   /**
    * Message manager.
    *
    * @var Drupal\webform\WebformMessageManagerInterface
    */
-  protected $message_manager;
+  protected $messageManager;
 
   /**
    * Webform token manager.
    *
    * @var Drupal\webform\WebformTokenManagerInterface
    */
-  protected $webform_token_manager;
+  protected $webformTokenManager;
 
   /**
    * Entity field manager.
    *
    * @var Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  protected $entity_field_manager;
+  protected $entityFieldManager;
 
   /**
    * Set up mock objects.
@@ -117,16 +117,16 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $this->mockServicesContainer();
 
     $this->configuration = [];
-    $this->plugin_id = 'bhcc_case_management';
-    $this->plugin_definition = NULL;
-    $this->logger_factory = $this->basicMockObject(LoggerChannelFactoryInterface::class);
-    $this->config_factory = $this->basicMockObject(ConfigFactoryInterface::class);
-    $this->entity_type_manager = $this->basicMockObject(EntityTypeManagerInterface::class);
-    $this->conditions_validator = $this->basicMockObject(WebformSubmissionConditionsValidatorInterface::class);
-    $this->http_client = $this->basicMockObject(ClientInterface::class);
-    $this->message_manager = $this->basicMockObject(WebformMessageManagerInterface::class);
+    $this->pluginId = 'bhcc_case_management';
+    $this->pluginDefinition = NULL;
+    $this->loggerFactory = $this->basicMockObject(LoggerChannelFactoryInterface::class);
+    $this->configFactory = $this->basicMockObject(ConfigFactoryInterface::class);
+    $this->entityTypeManager = $this->basicMockObject(EntityTypeManagerInterface::class);
+    $this->conditionsValidator = $this->basicMockObject(WebformSubmissionConditionsValidatorInterface::class);
+    $this->httpClient = $this->basicMockObject(ClientInterface::class);
+    $this->messageManager = $this->basicMockObject(WebformMessageManagerInterface::class);
 
-    $this->test_target = new CaseManagementPostWebformHandler($this->configuration, $this->plugin_id, $this->plugin_definition, $this->logger_factory, $this->config_factory, $this->entity_type_manager, $this->conditions_validator, $this->http_client, $this->message_manager);
+    $this->testTarget = new CaseManagementPostWebformHandler($this->configuration, $this->pluginId, $this->pluginDefinition, $this->loggerFactory, $this->configFactory, $this->entityTypeManager, $this->conditionsValidator, $this->httpClient, $this->messageManager);
   }
 
   /**
@@ -153,13 +153,13 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $container = new ContainerBuilder();
 
     // Add basic webform.token_manager service to the container.
-    $this->webform_token_manager = $this->basicMockObject(WebformTokenManagerInterface::class);
-    $this->entity_field_manager = $this->basicMockObject(EntityFieldManagerInterface::class);
-    $this->entity_field_manager->expects($this->any())
+    $this->webformTokenManager = $this->basicMockObject(WebformTokenManagerInterface::class);
+    $this->entityFieldManager = $this->basicMockObject(EntityFieldManagerInterface::class);
+    $this->entityFieldManager->expects($this->any())
       ->method('getBaseFieldDefinitions')
       ->willReturn([]);
-    $container->set('webform.token_manager', $this->webform_token_manager);
-    $container->set('entity_field.manager', $this->entity_field_manager);
+    $container->set('webform.token_manager', $this->webformTokenManager);
+    $container->set('entity_field.manager', $this->entityFieldManager);
 
     // Let Drupal use the mock container.
     \Drupal::setContainer($container);
@@ -281,7 +281,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Use invokeArgs as need to pass webform_values by refernece.
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
     $result = $method->invokeArgs(
-        $this->test_target,
+        $this->testTarget,
         [
           &$submission_data,
           $webform,
@@ -332,7 +332,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Use invokeArgs as need to pass webform_values by refernece.
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
     $result = $method->invokeArgs(
-      $this->test_target,
+      $this->testTarget,
       [
         &$submission_data,
         $webform,
@@ -366,7 +366,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method->setAccessible(TRUE);
     // Use invokeArgs as need to pass webform_values by refernece.
     // See :http://nibralab.github.io/reflection-and-call-by-reference/
-    $result = $method->invokeArgs($this->test_target, [&$webform_value]);
+    $result = $method->invokeArgs($this->testTarget, [&$webform_value]);
 
     // Assert that this is a simple case.
     $this->assertTrue($result);
@@ -394,7 +394,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSimpleCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [&$webform_value]);
+    $result = $method->invokeArgs($this->testTarget, [&$webform_value]);
 
     // Assert that this is a simple case.
     $this->assertFalse($result);
@@ -423,7 +423,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
-    $result = $method->invokeArgs($this->test_target, [
+    $result = $method->invokeArgs($this->testTarget, [
       &$webform_value,
       $webform_element,
     ]);
@@ -445,7 +445,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
       '#type' => 'bhcc_webform_date_of_birth',
     ];
     $result = $method->invokeArgs(
-      $this->test_target,
+      $this->testTarget,
       [
         &$webform_value_dob,
         $webform_element_dob,
@@ -492,7 +492,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
     $result = $method->invokeArgs(
-      $this->test_target,
+      $this->testTarget,
       [
         &$webform_value,
         $webform_element,
@@ -527,7 +527,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleElementSpecialCase');
     $method->setAccessible(TRUE);
     $result = $method->invokeArgs(
-      $this->test_target,
+      $this->testTarget,
       [
         &$webform_value,
         $webform_element,
@@ -562,7 +562,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareResponsePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $question, $answer, $machine_name, $webform_element);
+    $result = $method->invoke($this->testTarget, $question, $answer, $machine_name, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -589,7 +589,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareResponsePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $question, $answer, $machine_name, $webform_element);
+    $result = $method->invoke($this->testTarget, $question, $answer, $machine_name, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -621,7 +621,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareResponsePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $question, $answer, $machine_name, $webform_element);
+    $result = $method->invoke($this->testTarget, $question, $answer, $machine_name, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -675,7 +675,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareCompositePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $values, $webform_element);
+    $result = $method->invoke($this->testTarget, $values, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -775,7 +775,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareCompositePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $values, $webform_element);
+    $result = $method->invoke($this->testTarget, $values, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -845,7 +845,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'handleCompositeElementSpecialCase');
     $method->setAccessible(TRUE);
     $result = $method->invokeArgs(
-      $this->test_target,
+      $this->testTarget,
       [
         &$webform_value,
         $webform_element,
@@ -963,7 +963,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'prepareResponsePayload');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $question, $answer, $machine_name, $webform_element);
+    $result = $method->invoke($this->testTarget, $question, $answer, $machine_name, $webform_element);
 
     $this->assertEquals($expected, $result);
   }
@@ -996,7 +996,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'caseManagementPrepare');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $webform, $webform_submission);
+    $result = $method->invoke($this->testTarget, $webform, $webform_submission);
 
     $this->assertEquals($expected, $result);
   }
@@ -1026,7 +1026,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
         '#type' => 'select',
         '#title' => 'Service',
         '#options' => [
-          'With Service' => 'With Service',
+          'With Service' => ('With Service'),
         ],
       ],
     ];
@@ -1051,7 +1051,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'caseManagementPrepare');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $webform, $webform_submission);
+    $result = $method->invoke($this->testTarget, $webform, $webform_submission);
 
     $this->assertEquals($expected, $result);
   }
@@ -1079,7 +1079,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
     // Turn protected method into public method.
     $method = new \ReflectionMethod(CaseManagementPostWebformHandler::class, 'caseManagementPrepare');
     $method->setAccessible(TRUE);
-    $result = $method->invoke($this->test_target, $webform, $webform_submission);
+    $result = $method->invoke($this->testTarget, $webform, $webform_submission);
 
     $this->assertEquals($expected, $result);
   }

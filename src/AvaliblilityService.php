@@ -2,12 +2,11 @@
 
 namespace Drupal\bhcc_case_management;
 
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Drupal\webform\WebformInterface;
 
 /**
- * Class AvaliblilityService.
+ * Class to provide the AvaliblilityService.
  */
 class AvaliblilityService implements AvaliblilityServiceInterface {
 
@@ -26,6 +25,13 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
   protected $httpClient;
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactory
+   */
+  protected $configFactory;
+
+  /**
    * The Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -37,10 +43,10 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
    */
   public function __construct() {
 
-    // @TODO proper dependency injection
-    $this->config = \Drupal::config('bhcc_case_management.settings');
-    $this->httpClient = \Drupal::service('http_client');
-    $this->entityTypeManager = \Drupal::service('entity_type.manager');
+    // @todo proper dependency injection
+    $this->config = $this->configFactory->get('bhcc_case_management.settings');
+    $this->httpClient = $this->entityTypeManager->getStorage('http_client');
+    $this->entityTypeManager = $this->entityTypeManager->getStorage('entity_type.manager');
   }
 
   /**
@@ -48,7 +54,7 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
    */
   public function check(WebformInterface $webform) {
 
-    // Get case management service details
+    // Get case management service details.
     $caseManagementURL = $this->config->get('case_management_post_url');
     $authHeader = $this->config->get('case_management_auth_header');
 
@@ -93,7 +99,7 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
       ],
     ];
 
-    // Make get request
+    // Make get request.
     try {
       $response = $this->httpClient->get($caseManagementURL, $requestOptions);
     }
@@ -106,7 +112,7 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
       return FALSE;
     }
 
-    // Return based on status code
+    // Return based on status code.
     $status_code = $response->getStatusCode();
     return ($status_code >= 200 || $status_code < 300) ? TRUE : FALSE;
   }

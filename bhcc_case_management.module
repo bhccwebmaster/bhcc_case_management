@@ -41,33 +41,34 @@ function bhcc_case_management_form_alter(&$form, FormStateInterface $form_state,
       $form['#cache']['contexts'][] = 'user.roles:anonymous';
       $form['#cache']['contexts'][] = 'session';
       $form['#cache']['contexts'][] = 'cookies:citizenidtoken';
-      // However this needs to be triggered for anon users, making above redundant?
+      // However this needs to be triggered for
+      // anon users, making above redundant?
       \Drupal::service('page_cache_kill_switch')->trigger();
 
-      // Drupal Token check
+      // Drupal Token check.
       $cookieVars = \Drupal::Request()->cookies->all();
       if (empty($cookieVars['citizenidtoken'])) {
 
         // Test if citizen ID is required for the form.
-        // To allow anonymous access, in custom properties set allow_anon: TRUE
+        // To allow anonymous access, in custom properties set allow_anon: TRUE.
         $allow_anon = !empty($form['elements']['citizenidtoken']['#allow_anon']) ? TRUE : FALSE;
         // To allow form builders to test a webform, give them the permission
-        // bypass citizen id check
+        // bypass citizen id check.
         $bypass_citizenid = \Drupal::currentUser()->hasPermission('bypass citizen id check');
         if (!$allow_anon && !$bypass_citizenid) {
-          // If there is no token, redirect to an error page
+          // If there is no token, redirect to an error page.
           _bhcc_case_management_error_redirect($webform);
         }
 
-      } else {
+      }
+      else {
 
-        // @TODO: Verify citizenID token?
-
-        // Prefill the form elements
+        // @todo Verify citizenID token?
+        // Prefill the form elements.
         $form['elements']['citizenidtoken']['#default_value'] = $cookieVars['citizenidtoken'];
-        // @TODO: Replace this with a debug message using messanger.
+        // @todo Replace this with a debug message using messanger.
         if (function_exists('dpm')) {
-          dpm('Citizen ID Token: '.$cookieVars['citizenidtoken']);
+          // dpm('Citizen ID Token: ' . $cookieVars['citizenidtoken']);.
         }
       }
     }
@@ -96,12 +97,13 @@ function bhcc_case_management_form_alter(&$form, FormStateInterface $form_state,
 
 /**
  * Redirect to error page.
- * @param  \Drupal\webform\WebformInterface $webform
+ *
+ * @param \Drupal\webform\WebformInterface $webform
  *   The webform.
  */
 function _bhcc_case_management_error_redirect(WebformInterface $webform) {
 
-  // If there is no token, redirect to an error page
+  // If there is no token, redirect to an error page.
   $redirectErrorPage = 'bhcc_case_management.citizen_id_controller_error_webform';
   $errorPageParameters = ['webform' => $webform->id()];
   $errorUrl = Url::fromRoute($redirectErrorPage, $errorPageParameters);

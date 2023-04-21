@@ -6,7 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class ConfigForm.
+ * Provides the bhcc_case_management config form.
  */
 class ConfigForm extends ConfigFormBase {
 

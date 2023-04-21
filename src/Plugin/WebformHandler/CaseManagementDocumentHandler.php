@@ -2,26 +2,9 @@
 
 namespace Drupal\bhcc_case_management\Plugin\WebformHandler;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
-use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\RedirectCommand;
-use Drupal\webform\Ajax\WebformRefreshCommand;
-use Drupal\webform\Ajax\WebformSubmissionAjaxResponse;
-use Drupal\Core\Url;
-use Drupal\webform\Utility\WebformElementHelper;
-use Drupal\webform\WebformInterface;
-use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
 use Drupal\webform\WebformSubmissionInterface;
-use Drupal\webform\WebformMessageManagerInterface;
 use Drupal\webform\Plugin\WebformHandlerBase;
-use Drupal\webform\WebformTokenManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
@@ -67,6 +50,13 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
   protected $tokenManager;
 
   /**
+   * The webform.
+   *
+   * @var \Drupal\webform\WebformInterface
+   */
+  protected $webform;
+
+  /**
    * File system service.
    *
    * @var \Drupal\Core\File\FileSystemInterface
@@ -78,7 +68,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->httpClient =   $container->get('http_client');
+    $instance->httpClient = $container->get('http_client');
     $instance->messageManager = $container->get('webform.message_manager');
     $instance->tokenManager = $container->get('webform.token_manager');
     $instance->fileSystem = $container->get('file_system');
@@ -101,7 +91,10 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+
     $webform = $this->getWebform();
+
+    $msg_1 = 'Must begin with either private:// or public://';
 
     // Case Management web service overrides.
     $form['zip'] = [
@@ -111,7 +104,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
     $form['zip']['zip_directory'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Directory'),
-      '#description' => $this->t('Location to upload zip archive files to.') . '<br>' . $this->t('Must begin with either private:// or public://' . '<br>' . $this->t('Do not include the trailing slash.')),
+      '#description' => $this->t('Location to upload zip archive files to.') . '<br>' . ($msg_1 . '<br>' . $this->t('Do not include the trailing slash.')),
       '#size' => 64,
       '#default_value' => $this->configuration['zip_directory'],
       '#required' => TRUE,
@@ -137,7 +130,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $form_values = $form_state->getValues();
 
-    // Validate zip_directory starts with public:// or private://
+    // Validate zip_directory starts with public:// or private://.
     if (strpos($form_values['zip_directory'], 'public://') !== 0 && strpos($form_values['zip_directory'], 'private://') !== 0) {
       $form_state->setErrorByName('settings[zip_directory]', $this->t('Zip directory must begin with either private:// or public://'));
     }
@@ -154,7 +147,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // copied from RemotePostWebformHandler.
+    // Copied from RemotePostWebformHandler.
     parent::submitConfigurationForm($form, $form_state);
     $this->applyFormStateToConfiguration($form_state);
   }
@@ -172,26 +165,27 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
     $zip_directory = $this->replaceTokens($this->configuration['zip_directory'], $webform_submission);
     $zip_filename = $this->replaceTokens($this->configuration['zip_filename'], $webform_submission);
 
-    // Generate Zip file as temporary file for coping
+    // Generate Zip file as temporary file for coping.
     $zip_uri = $zip_directory . '/' . $zip_filename . '.zip';
-    $zip = new \ZipArchive;
+    $zip = new \ZipArchive();
     $zip->open($this->fileSystem->realpath($temporary_file), \ZipArchive::CREATE);
 
     // Iterate through webform submission fields.
     foreach ($submission_data as $key => $value) {
-      // Get the webform element
+      // Get the webform element.
       $webformElement = $this->webform->getElement($key);
 
-      // If this is a document uploader field
+      // If this is a document uploader field.
       if ($webformElement['#type'] == 'webform_document_file') {
-        // Add files to ZipArchive
+        // Add files to ZipArchive.
         if (is_int($value)) {
-          $this->add_file_to_zip($value, $zip, $key);
-        } elseif (is_array($value)) {
+          $this->addFiletoZip($value, $zip, $key);
+        }
+        elseif (is_array($value)) {
           // Array walk to handle multiple.
-          array_walk_recursive($value, function($fid, $index) use($zip, $key) {
+          array_walk_recursive($value, function ($fid, $index) use ($zip, $key) {
             if (is_int($fid)) {
-              $this->add_file_to_zip($fid, $zip, $key);
+              $this->addFiletoZip($fid, $zip, $key);
             }
           });
         }
@@ -214,16 +208,17 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
     $copied_file = $this->fileSystem->copy($temporary_file, $zip_uri, FileSystemInterface::EXISTS_RENAME);
     $copied_file = $this->fileSystem->basename($copied_file, '.zip');
 
-    // Set FLAG file destination
+    // Set FLAG file destination.
     $flag_destination = $zip_directory . '/' . $copied_file . ".FLAG";
 
-    // Generate flag file and populate flag file with zip filename
+    // Generate flag file and populate flag file with zip filename.
     $fileSaveData = $this->fileSystem->saveData($copied_file . '.zip' . PHP_EOL . $zip_filename, $flag_destination, FileSystemInterface::EXISTS_REPLACE);
 
   }
 
   /**
-   * Add file to a zip archive
+   * Add file to a zip archive.
+   *
    * @param int $fid
    *   File ID to add.
    * @param \ZipArchive $zip
@@ -231,7 +226,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
    * @param string $field_key
    *   Key of the webform field, used to add a directory.
    */
-  protected function add_file_to_zip(int $fid, \ZipArchive $zip, string $field_key) {
+  protected function addFiletoZip(int $fid, \ZipArchive $zip, string $field_key) {
     $file = File::load($fid);
     $localname = $field_key . '/' . $file->getFilename();
     $filename = $this->fileSystem->realpath($file->getFileUri());

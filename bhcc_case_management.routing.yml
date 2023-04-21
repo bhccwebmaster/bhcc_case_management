@@ -37,13 +37,3 @@ bhcc_case_management.bhcc_case_management_config_form:
     _permission: 'access case management configuration'
   options:
     _admin_route: TRUE
-
-bhcc_case_management.case_management_covid_file_retrive_controller_retrive:
-  path: '/cm-retrive-file'
-  defaults:
-    _controller: '\Drupal\bhcc_case_management\Controller\CaseManagementCovidFileRetriveController::retrive'
-    _title: 'Retrive'
-  requirements:
-    _permission: 'access content'
-  options:
-    no_cache: TRUE

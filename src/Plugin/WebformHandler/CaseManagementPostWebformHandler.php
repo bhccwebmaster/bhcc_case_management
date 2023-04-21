@@ -2,23 +2,12 @@
 
 namespace Drupal\bhcc_case_management\Plugin\WebformHandler;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\webform\Ajax\WebformRefreshCommand;
 use Drupal\webform\Ajax\WebformSubmissionAjaxResponse;
-use Drupal\Core\Url;
-use Drupal\webform\Utility\WebformElementHelper;
-use Drupal\webform\Element\WebformMessage;
 use Drupal\webform\WebformInterface;
-use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
 use Drupal\webform\WebformSubmissionInterface;
 use Drupal\webform\WebformMessageManagerInterface;
 use Drupal\webform\Plugin\WebformHandlerBase;
@@ -66,7 +55,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->httpClient =   $container->get('http_client');
+    $instance->httpClient = $container->get('http_client');
     $instance->messageManager = $container->get('webform.message_manager');
     $instance->entityTypeManager = $container->get('entity_type.manager');
 
@@ -154,7 +143,6 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     ];
 
     // $this->elementTokenValidate($form);
-
     return $this->setSettingsParents($form);
   }
 
@@ -162,7 +150,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // copied from RemotePostWebformHandler.
+    // Copied from RemotePostWebformHandler.
     parent::submitConfigurationForm($form, $form_state);
     $this->applyFormStateToConfiguration($form_state);
   }
@@ -177,13 +165,14 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
-   * Prepare webform submission for case management
+   * Prepare webform submission for case management.
    *
    * @param \Drupal\webform\WebformInterfaceWebformInterface $webform
    *   The original webform.
    * @param \Drupal\webform\WebformSubmissionInterface $webform_submission
-   *   Webform Submission
-   * @return Array
+   *   Webform Submission.
+   *
+   * @return array
    *   Post data array.
    */
   protected function caseManagementPrepare(WebformInterface $webform, WebformSubmissionInterface $webform_submission) {
@@ -201,7 +190,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
           continue;
         }
 
-        // Get the webform element
+        // Get the webform element.
         $webformElement = $webform->getElement($key);
 
         // Prepare the payload data structure.
@@ -226,21 +215,23 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       'payload'   => $payload,
     ];
 
-    // Output debug payload
+    // Output debug payload.
     if (function_exists('dpm')) {
-      dpm(json_encode($postData));
+      // dpm(json_encode($postData));
     }
 
     return $postData;
   }
 
   /**
-   * Has document files
-   * @param  Array                      $submission_data
+   * Has document files.
+   *
+   * @param array $submission_data
    *   Submission data.
-   * @param  WebformInterface           $webform
+   * @param \Drupal\webform\WebformInterface $webform
    *   Webform entity.
-   * @return boolean
+   *
+   * @return bool
    *   TRUE if there are files, FALSE otherwise.
    */
   protected function hasDocumentFiles(Array &$submission_data, WebformInterface $webform) {
@@ -250,10 +241,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     // Iterate through webform submission fields.
     foreach ($submission_data as $key => $value) {
 
-      // Get the webform element
+      // Get the webform element.
       $webform_element = $webform->getElement($key);
 
-      // If this is a document uploader field
+      // If this is a document uploader field.
       if ($webform_element['#type'] == 'webform_document_file') {
         if (!empty($value)) {
           $has_files = TRUE;
@@ -267,20 +258,22 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     }
 
     return $has_files;
-    }
+  }
 
   /**
    * Prepare element submission as response payload.
-   * @param  string $question
+   *
+   * @param string $question
    *   The webform element question.
-   * @param  string|Array $value
+   * @param string|array $value
    *   The user entered webform value,
    *   could be an array if form element is complex.
-   * @param  string $machine_name
+   * @param string $machine_name
    *   The webform element machine name.
-   * @param  Array  $webformElement
+   * @param array $webformElement
    *   The webform element details, gathered from $webform->getElement($key).
-   * @return Array
+   *
+   * @return array
    *   Payload array for case management, with keys question, machine name and
    *   either answer for simple answers,
    *   or composite_answer for multifield / multivalue answers.
@@ -306,10 +299,12 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Handle simple multivalue elements (checkboxes).
-   * @param  Array  $value
+   *
+   * @param array $value
    *   (By reference) the form element value.
    *   Will be altered to newline seperated string if meets simple case.
-   * @return boolean
+   *
+   * @return bool
    *   True if element meets simple case.
    */
   protected function handleElementSimpleCase(Array &$value) {
@@ -324,12 +319,14 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Handle special cases of multivalue elements.
-   * @param  Array  $value
+   *
+   * @param array $value
    *   (By reference) the form element value.
    *   Will be converted to a string if meets a special case.
-   * @param  Array  $webformElement
+   * @param array $webformElement
    *   The webform element details, gathered from $webform->getElement($key).
-   * @return boolean
+   *
+   * @return bool
    *   True if element meets special case.
    */
   protected function handleElementSpecialCase(Array &$value, Array $webformElement) {
@@ -339,8 +336,11 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     // If multiple, seperate by newline.
     if ($webformElement['#type'] == 'bhcc_webform_date' || $webformElement['#type'] == 'bhcc_webform_date_of_birth') {
       if (isset($value[0])) {
-        $value = implode("\n", array_map(function($indv_value) { return $this->handleElementSpecialCaseDate($indv_value); }, $value));
-      } else {
+        $value = implode("\n", array_map(function ($indv_value) {
+          return $this->handleElementSpecialCaseDate($indv_value);
+        }, $value));
+      }
+      else {
         $value = $this->handleElementSpecialCaseDate($value);
       }
     }
@@ -350,15 +350,17 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Handle element special case - BHCC Date.
-   * @param  Array $originalValue
+   *
+   * @param array $originalValue
    *   The original value array.
+   *
    * @return Mixed
    *   Formatted date string as YYYY-MM-DD.
    *   Null if no dates entered - @see DRUP-1187
    */
   protected function handleElementSpecialCaseDate($originalValue) {
 
-    // If all values are empty, return
+    // If all values are empty, return.
     if (empty($originalValue['year']) && empty($originalValue['month']) && empty($originalValue['day'])) {
       return NULL;
     }
@@ -374,12 +376,15 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    * Handle special cases of multivalue composite elements.
    *
    * This is for where the answers need to appear under composite_answers.
+   *
    * @todo this should really be handled in the custom element where possible.
-   * @param  Array  $value
+   *
+   * @param array $value
    *   (By reference) the form element value.
-   * @param  Array  $webformElement
+   * @param array $webformElement
    *   The webform element details, gathered from $webform->getElement($key).
-   * @return boolean
+   *
+   * @return bool
    *   True if element meets special case.
    */
   protected function handleCompositeElementSpecialCase(Array &$value, Array $webformElement) {
@@ -389,11 +394,14 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     }
 
     $existing_value = $value;
-    // Address Lookup
+    // Address Lookup.
     if ($webformElement['#type'] == 'bhcc_central_hub_webform_uk_address') {
       if (isset($value[0])) {
-        $value = array_map(function($indv_value) use($webformElement) { return $this->handleCompositeElementSpecialCaseAddress($indv_value, $webformElement); }, $value);
-      } else {
+        $value = array_map(function ($indv_value) use ($webformElement) {
+          return $this->handleCompositeElementSpecialCaseAddress($indv_value, $webformElement);
+        }, $value);
+      }
+      else {
         $value = $this->handleCompositeElementSpecialCaseAddress($value, $webformElement);
       }
     }
@@ -402,11 +410,13 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
-   * Handle composite element special case address
-   * @param  array $originalValue
+   * Handle composite element special case address.
+   *
+   * @param array $originalValue
    *   The original array value.
-   * @param  array $webformElement
+   * @param array $webformElement
    *   The webform element details, gathered from $webform->getElement($key).
+   *
    * @return array
    *   Formatted composite value.
    */
@@ -431,11 +441,13 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Prepare the composite submission element payload.
-   * @param  Array  $values
+   *
+   * @param array $values
    *   User entered webform submission responses from composite webform element.
-   * @param  Array  $webformElement
+   * @param array $webformElement
    *   The webform element details, gathered from $webform->getElement($key).
-   * @return Array
+   *
+   * @return array
    *   Multidimensional array containing the payload for each part of the
    *   composite using $this->prepareResponsePayload, grouped by the
    *   submission delta.
@@ -451,7 +463,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
     $composite_value = [];
 
-    // Assemble composite field
+    // Assemble composite field.
     foreach ($values as $index => $composite_values) {
 
       // Loop through each delta of the submission to gather the payload.
@@ -460,12 +472,14 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       // Check if special case and assign group value.
       if ($this->handleCompositeElementSpecialCase($composite_values, $webformElement)) {
         $group_value = $composite_values;
-      // Else loop through and contruct composite.
-      } else {
+        // Else loop through and contruct composite.
+      }
+      else {
         foreach ($composite_values as $indv_key => $indv_value) {
           if (isset($webformElement['#webform_composite_elements'][$indv_key]['#title'])) {
             $indv_title = (string) $webformElement['#webform_composite_elements'][$indv_key]['#title'];
-          } else {
+          }
+          else {
             $indv_title = '';
           }
           $group_value[] = $this->prepareResponsePayload($indv_title, $indv_value, $indv_key, $webformElement);
@@ -480,16 +494,17 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Post form submission to case management.
+   *
    * @param string $state
    *   (For future use):
    *   The state of the webform submission.
    *   Either STATE_NEW, STATE_DRAFT_CREATED, STATE_DRAFT_UPDATED,
    *   STATE_COMPLETED, STATE_UPDATED, or STATE_CONVERTED
    *   depending on the last save operation performed.
-   * @param Array $postData
-   *   Post data from caseManagementPrepare
+   * @param array $postData
+   *   Post data from caseManagementPrepare.
    * @param \Drupal\webform\WebformSubmissionInterface $webform_submission
-   *   Webform Submission
+   *   Webform Submission.
    */
   protected function caseManagementPost($state, $postData, WebformSubmissionInterface $webform_submission) {
 
@@ -513,7 +528,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       // @see DRUP-1196.
       $status_code = (!empty($response) ? $response->getStatusCode() : 0);
 
-      // Log the error
+      // Log the error.
       $context_options = [
         '@citizenidtoken' => $postData['citizenId'],
         '@statuscode' => $status_code,
@@ -529,7 +544,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
       return;
     }
 
-    // Get the status code
+    // Get the status code.
     $status_code = $response->getStatusCode();
 
     // Log the submission.
@@ -540,7 +555,8 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     ];
     $this->logHandler($context_options, $webform_submission, "Posted to case management.<br>Citizen ID token: @citizenidtoken.<br>Status code: @statuscode", 'notice');
 
-    // Display submission exception if response code is not 2xx. (from remotePostHandler)
+    // Display submission exception if response code is not 2xx.
+    // (from remotePostHandler)
     if ($status_code < 200 || $status_code >= 300) {
       $message = $this->t('Remote post request return @status_code status code.', ['@status_code' => $status_code]);
       $this->handleError($state, $message, $caseManagementURL, 'POST', 'json', $requestOptions, $response);
@@ -552,14 +568,15 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
-   * Log Handler - Helper to log to webform submission log
-   * @param  Array $context_options
+   * Log Handler - Helper to log to webform submission log.
+   *
+   * @param array $context_options
    *   Array of additional context options.
-   * @param  \Drupal\webform\WebformSubmissionInterface $webform_submission
+   * @param \Drupal\webform\WebformSubmissionInterface $webform_submission
    *   Webform submission.
-   * @param  string $message
+   * @param string $message
    *   Message to log, include @placeholder to add placeholders.
-   * @param  string $type
+   * @param string $type
    *   Log message type, (info, notice, warning, error), default to info.
    */
   protected function logHandler($context_options, $webform_submission, $message, $type = 'info') {
@@ -575,12 +592,15 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
         case 'notice':
           $logger->notice($message, $context);
           break;
+
         case 'warning':
           $logger->warning($message, $context);
           break;
+
         case 'error':
           $logger->error($message, $context);
           break;
+
         default:
           $logger->info($message, $context);
       }
@@ -590,7 +610,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   /**
    * Handle error by logging and display debugging and/or exception message.
    *
-   * Taken from \Drupal\webform\Plugin\WebformHandler\RemotePostWebformHandler
+   * Taken from \Drupal\webform\Plugin\WebformHandler\RemotePostWebformHandler.
    *
    * @param string $state
    *   The state of the webform submission.
@@ -614,8 +634,8 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     global $base_url, $base_path;
 
     // If debugging is enabled, display the error message on screen.
-    // $this->debug($message, $state, $request_url, $request_method, $request_type, $request_options, $response, 'error');
-
+    // $this->debug($message, $state, $request_url, $request_method,
+    // $request_type, $request_options, $response, 'error');.
     // Log error message.
     $context = [
       '@form' => $this->getWebform()->label(),
@@ -636,7 +656,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     $this->messageManager->display(WebformMessageManagerInterface::SUBMISSION_EXCEPTION_MESSAGE, 'error');
 
     // Redirect the current request to the error url.
-    $error_url = '/citizenid-error/'.$this->getWebform()->id();
+    $error_url = '/citizenid-error/' . $this->getWebform()->id();
     // dpm($response);
     if ($error_url && PHP_SAPI !== 'cli') {
       // Convert error path to URL.
@@ -651,9 +671,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
         $ajaxResponse = new WebformSubmissionAjaxResponse();
         $command = new WebformRefreshCommand($error_url);
         $ajaxResponse->addCommand($command);
-        // @TODO fiqure out how to actully send this redirect.
+        // @todo fiqure out how to actully send this redirect.
         // $ajaxResponse->send();
-      } else {
+      }
+      else {
         $redirect = new TrustedRedirectResponse($error_url);
         $redirect->send();
       }
@@ -664,7 +685,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   /**
    * Get the Contact management group entity.
    *
-   * @return \Drupal\bhcc_case_management\Entity\ContactManagementGroupEntityInterface|NULL
+   * @return \Drupal\bhcc_case_management\Entity\ContactManagementGroupEntityInterface|null
    *   Contact management group entity, or NULL if not set.
    */
   protected function getContactManagementGroup() {
@@ -678,7 +699,8 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
-   * Get default case management url
+   * Get default case management url.
+   *
    * @return string
    *   Default URL used for posting into case management.
    */
@@ -689,6 +711,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
 
   /**
    * Get case management url.
+   *
    * @return string
    *   URL to post submission into case management.
    *   Will either be the overridden value, or if blank the default.
@@ -705,13 +728,14 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     $enable_override = $this->configuration['enable_override'];
     $override = $this->configuration['override_case_management_post_url'];
 
-    // If override is enabled, return the override, 
+    // If override is enabled, return the override,
     // else the cm group, else the default.
     return (!empty($enable_override) ? $override : (!empty($cm) ? $cm : $default));
   }
 
   /**
-   * Get default case management auth header
+   * Get default case management auth header.
+   *
    * @return string
    *   The default auth header for posting into case management,
    */
@@ -721,7 +745,8 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   }
 
   /**
-   * Get case management auth header
+   * Get case management auth header.
+   *
    * @return string
    *   Auth header to post into case management.
    *   Will either be overridden value, or if blank the default.
@@ -738,12 +763,11 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     $enable_override = $this->configuration['enable_override'];
     $override = $this->configuration['override_case_management_auth_header'];
 
-    // If override is enabled, return the override, 
+    // If override is enabled, return the override,
     // else the cm group, else the default.
+    // Helper functions copied from RemotePostWebformHandler.
     return (!empty($enable_override) ? $override : (!empty($cm) ? $cm : $default));
   }
-
-  // Helper functions copied from RemotePostWebformHandler.
 
   /**
    * Determine if saving of results is enabled.
@@ -774,4 +798,5 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   protected function isConvertEnabled() {
     return $this->isDraftEnabled() && ($this->getWebform()->getSetting('form_convert_anonymous') === TRUE);
   }
+
 }

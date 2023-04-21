@@ -7,49 +7,97 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Cookie;
 use Drupal\Core\Url;
 use Drupal\webform\WebformInterface;
-use Drupal\node\Entity\Node;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Config\ConfigFactory;
 
 /**
  * Class MendixController.
  */
-class CitizenIdController extends ControllerBase {
+class CitizenIdController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
-   * Verify Citizen ID
+   * Service node instance.
+   *
+   * @var \Drupal\node\Entity\Node
+   */
+  protected $node = FALSE;
+
+  /**
+   * Configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactory
+   */
+  protected $configFactory;
+
+  /**
+   * The destination used by the current request.
+   *
+   * @var string
+   */
+  protected $destination;
+
+
+  /**
+   * Entity Type Manager.
+   *
+   * @var Drupal\Core\Entity\EntityTypeManager
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The contrustor for the citizenIdController.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManager $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactory $configFactory
+   *   The configuration factory.
+   */
+  public function construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactory $configFactory) {
+
+    $this->entityTypeManager = $entity_type_manager;
+    $this->configFactory = $configFactory;
+  }
+
+  /**
+   * Verify Citizen ID.
+   *
    * @param Symfony\Component\HttpFoundation\Request $request
    *   Request object.
    */
   public function verify(Request $request) {
 
-    $config = \Drupal::config('bhcc_case_management.settings');
+    $config = $this->configFactory->get('bhcc_case_management.settings');
     $citizenIDServiceURL = $config->get('citizen_id_service_url');
 
     // Get drupal cookie vars from request.
     $cookieVars = $request->cookies->all();
     $queryVars = $request->query->all();
 
-
     // Verifiy the citizenID token.
     if (!empty($cookieVars['citizenidtoken']) || !empty($queryVars['citizenidtoken'])) {
-      // @TODO add verification that citizenID is valid.
+      // @todo add verification that citizenID is valid.
       $has_citizenid = TRUE;
-    } else {
+    }
+    else {
       $has_citizenid = FALSE;
     }
 
     if (!empty($queryVars['citizenidtoken'])) {
       $citizenID = $queryVars['citizenidtoken'];
-    } elseif (empty($queryVars['citizenidtoken']) && !empty($cookieVars['citizenidtoken'])) {
+    }
+    elseif (empty($queryVars['citizenidtoken']) && !empty($cookieVars['citizenidtoken'])) {
       $citizenID = $cookieVars['citizenidtoken'];
-    } else {
+    }
+    else {
       $citizenID = NULL;
     }
 
-    $newCitizenIDcookie = new Cookie('citizenidtoken', $citizenID, '+6 Hours', '/' );
+    $newCitizenIDcookie = new Cookie('citizenidtoken', $citizenID, '+6 Hours', '/');
 
     // Get the Desintation Parameter.
-    $destination_str = \Drupal::destination()->get();
+    $destination_str = $this->getRedirectDestination()->get();
     // Make sure destination has a prefixed /.
     $destination_str = strpos($destination_str, '/') === 0 ? $destination_str : '/' . $destination_str;
     $destination = Url::fromUserInput($destination_str);
@@ -62,17 +110,21 @@ class CitizenIdController extends ControllerBase {
       // Check that this is a webform or webform node.
       if ($routeName == 'entity.webform.canonical' && !empty($parameters['webform'])) {
         $valid_path = TRUE;
-      } elseif ($routeName == 'entity.node.canonical' && !empty($parameters['node'])) {
-        $node = Node::load($parameters['node']);
+      }
+      elseif ($routeName == 'entity.node.canonical' && !empty($parameters['node'])) {
+        $node = $this->entityTypeManager->getStorage('node')->load($parameters['node']);
         if ($node->bundle() == 'webform') {
           $valid_path = TRUE;
-        } else {
+        }
+        else {
           $valid_path = FALSE;
         }
-      } else {
+      }
+      else {
         $valid_path = FALSE;
       }
-    } else {
+    }
+    else {
       $valid_path = FALSE;
     }
 
@@ -107,6 +159,7 @@ class CitizenIdController extends ControllerBase {
 
   /**
    * Generic error page.
+   *
    * @param Symfony\Component\HttpFoundation\Request $request
    *   Request object.
    */
@@ -114,38 +167,41 @@ class CitizenIdController extends ControllerBase {
 
     $output = '<p>There was an error with Citizen ID</p>';
 
-    // Return output to browser
+    // Return output to browser.
     return [
       '#type' => 'markup',
-      '#markup' => $output
+      '#markup' => $output,
     ];
   }
 
   /**
-   * Error with webform
+   * Error with webform.
+   *
    * @param Symfony\Component\HttpFoundation\Request $request
    *   Request object.
-   * @param  Drupal\webform\Entity\WebformInterface $webform
+   * @param Drupal\webform\Entity\WebformInterface $webform
    *   Webform object.
    */
   public function errorWebform(Request $request, WebformInterface $webform) {
 
-    $output = '<p>' . t('You cannot access the form at this time.') . '</p>';
+    $output = '<p>' . $this->t('You cannot access the form at this time.') . '</p>';
 
-    // Return output to browser
+    // Return output to browser.
     return [
       '#type' => 'markup',
-      '#markup' => $output
+      '#markup' => $output,
     ];
   }
+
   /**
    * Error page title.
-   * @param  Drupal\webform\Entity\WebformInterface $webform
+   *
+   * @param Drupal\webform\Entity\WebformInterface $webform
    *   Webform object.
    */
   public function errorWebformTitle(WebformInterface $webform) {
 
-    return t('Error with ') . $webform->label() . t(' and Citizen ID');
+    return $this->t('Error with') . $webform->label() . $this->t('and Citizen ID');
   }
 
 }
