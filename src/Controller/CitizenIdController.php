@@ -68,9 +68,6 @@ class CitizenIdController extends ControllerBase implements ContainerInjectionIn
    */
   public function verify(Request $request) {
 
-    $config = $this->configFactory->get('bhcc_case_management.settings');
-    $citizenIDServiceURL = $config->get('citizen_id_service_url');
-
     // Get drupal cookie vars from request.
     $cookieVars = $request->cookies->all();
     $queryVars = $request->query->all();
@@ -94,7 +91,7 @@ class CitizenIdController extends ControllerBase implements ContainerInjectionIn
       $citizenID = NULL;
     }
 
-    $newCitizenIDcookie = new Cookie('citizenidtoken', $citizenID, '+6 Hours', '/');
+    new Cookie('citizenidtoken', $citizenID, '+6 Hours', '/');
 
     // Get the Desintation Parameter.
     $destination_str = $this->getRedirectDestination()->get();
@@ -129,6 +126,7 @@ class CitizenIdController extends ControllerBase implements ContainerInjectionIn
     }
 
     // Pass through query string.
+    $options = [];
     $options['query'] = $queryVars;
     unset($options['query']['destination']);
     unset($options['query']['citizenidtoken']);

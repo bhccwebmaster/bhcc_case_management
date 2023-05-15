@@ -92,8 +92,6 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
 
-    $webform = $this->getWebform();
-
     $msg_1 = 'Must begin with either private:// or public://';
 
     // Case Management web service overrides.
@@ -212,7 +210,7 @@ class CaseManagementDocumentHandler extends WebformHandlerBase {
     $flag_destination = $zip_directory . '/' . $copied_file . ".FLAG";
 
     // Generate flag file and populate flag file with zip filename.
-    $fileSaveData = $this->fileSystem->saveData($copied_file . '.zip' . PHP_EOL . $zip_filename, $flag_destination, FileSystemInterface::EXISTS_REPLACE);
+    $this->fileSystem->saveData($copied_file . '.zip' . PHP_EOL . $zip_filename, $flag_destination, FileSystemInterface::EXISTS_REPLACE);
 
   }
 

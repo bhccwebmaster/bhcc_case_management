@@ -68,8 +68,10 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
   public function defaultConfiguration() {
 
     // Excluded fields for future use.
+    // @codingStandardsIgnoreStart
     $field_names = array_keys(\Drupal::service('entity_field.manager')->getBaseFieldDefinitions('webform_submission'));
     $excluded_data = array_combine($field_names, $field_names);
+    // @codingStandardsIgnoreEnd
 
     // Default values for overrides (blank)
     return [
@@ -84,7 +86,6 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $webform = $this->getWebform();
 
     // Get Contact management groups.
     $cm_group_storage = $this->entityTypeManager
@@ -464,7 +465,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     $composite_value = [];
 
     // Assemble composite field.
-    foreach ($values as $index => $composite_values) {
+    foreach ($values as $composite_values) {
 
       // Loop through each delta of the submission to gather the payload.
       $group_value = [];

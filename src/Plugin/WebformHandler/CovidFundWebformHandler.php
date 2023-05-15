@@ -66,17 +66,12 @@ class CovidFundWebformHandler extends WebformHandlerBase {
 
     // Retrieve, process and set company name.
     $company = $webform_submission->getData()['company_name_'];
-    $companyName = preg_replace('/[^a-zA-Z0-9]/', '', $company);
 
     // Retrieve and set email.
     $email = $webform_submission->getData()['your_email'];
 
-    // Set timestamp.
-    $date = date("YmdHis", time());
-
     // Generate unique ID.
     $caseKey = $webform_submission->getData()['casekey'];
-    // $companyName . $date;
     $uniqueId = $caseKey;
 
     // Retrieve document FIDs.
@@ -122,13 +117,13 @@ class CovidFundWebformHandler extends WebformHandlerBase {
 
       // Generate flag file and populate flag file with email,
       // unique ID and zip filename.
-      $fileSaveData = \Drupal::service('file.repository')->writeData($email . PHP_EOL . $uniqueId . '.zip' . PHP_EOL . $uniqueId, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
+      \Drupal::service('file.repository')->writeData($email . PHP_EOL . $uniqueId . '.zip' . PHP_EOL . $uniqueId, $flagDestination, FileSystemInterface::EXISTS_REPLACE);
 
       // Copy to new location - @todo reverse these
       // so only the copies are managed as boomi ones get deleted.
-      $copiedfile = $file_system->copy($zipUri, self::GRANT_FOLDER . $uniqueId . '.zip');
+      $file_system->copy($zipUri, self::GRANT_FOLDER . $uniqueId . '.zip');
       $this->saveFileToDb($uniqueId . '.zip');
-      $copiedflag = $file_system->copy($flagDestination, self::GRANT_FOLDER . $uniqueId . '.flag');
+      $file_system->copy($flagDestination, self::GRANT_FOLDER . $uniqueId . '.flag');
       $this->saveFileToDb($uniqueId . '.flag');
     }
 
