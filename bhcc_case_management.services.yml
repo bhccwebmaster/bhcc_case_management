@@ -4,4 +4,4 @@ services:
     arguments: ['bhcc_case_management']
   bhcc_case_management.service_avaliblility:
     class: Drupal\bhcc_case_management\AvaliblilityService
-    arguments: []
+    arguments: ['@config.factory', '@http_client', '@entity_type.manager']

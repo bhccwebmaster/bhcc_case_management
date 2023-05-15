@@ -4,6 +4,9 @@ namespace Drupal\bhcc_case_management;
 
 use GuzzleHttp\Exception\RequestException;
 use Drupal\webform\WebformInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use GuzzleHttp\ClientInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Class to provide the AvaliblilityService.
@@ -25,13 +28,6 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
   protected $httpClient;
 
   /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactory
-   */
-  protected $configFactory;
-
-  /**
    * The Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -40,13 +36,18 @@ class AvaliblilityService implements AvaliblilityServiceInterface {
 
   /**
    * Constructs a new AvaliblilityService object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Configuration factory.
+   * @param \GuzzleHttp\ClientInterface $http_client
+   *   HTTP client service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager service.
    */
-  public function __construct() {
-
-    // @todo proper dependency injection
-    $this->config = $this->configFactory->get('bhcc_case_management.settings');
-    $this->httpClient = $this->entityTypeManager->getStorage('http_client');
-    $this->entityTypeManager = $this->entityTypeManager->getStorage('entity_type.manager');
+  public function __construct(ConfigFactoryInterface $config_factory, ClientInterface $http_client, EntityTypeManagerInterface $entity_type_manager) {
+    $this->config = $config_factory->get('bhcc_case_management.settings');
+    $this->httpClient = $http_client;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
