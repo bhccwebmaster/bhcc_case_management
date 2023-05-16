@@ -18,11 +18,11 @@ use Drupal\Core\Config\ConfigFactory;
 class CitizenIdController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
-   * Service node instance.
+   * Entity Type Manager.
    *
-   * @var \Drupal\node\Entity\Node
+   * @var Drupal\Core\Entity\EntityTypeManager
    */
-  protected $node = FALSE;
+  protected $entityTypeManager;
 
   /**
    * Configuration factory.
@@ -30,21 +30,6 @@ class CitizenIdController extends ControllerBase implements ContainerInjectionIn
    * @var \Drupal\Core\Config\ConfigFactory
    */
   protected $configFactory;
-
-  /**
-   * The destination used by the current request.
-   *
-   * @var string
-   */
-  protected $destination;
-
-
-  /**
-   * Entity Type Manager.
-   *
-   * @var Drupal\Core\Entity\EntityTypeManager
-   */
-  protected $entityTypeManager;
 
   /**
    * The contrustor for the citizenIdController.
