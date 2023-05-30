@@ -9,8 +9,8 @@ use Drupal\Core\Url;
 use Drupal\webform\WebformInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Config\ConfigFactory;
 
 /**
  * Class MendixController.
@@ -25,24 +25,23 @@ class CitizenIdController extends ControllerBase implements ContainerInjectionIn
   protected $entityTypeManager;
 
   /**
-   * Configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactory
-   */
-  protected $configFactory;
-
-  /**
    * The contrustor for the citizenIdController.
    *
    * @param \Drupal\Core\Entity\EntityTypeManager $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Config\ConfigFactory $configFactory
-   *   The configuration factory.
    */
-  public function construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactory $configFactory) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
 
     $this->entityTypeManager = $entity_type_manager;
-    $this->configFactory = $configFactory;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager')
+    );
   }
 
   /**
