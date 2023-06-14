@@ -3,8 +3,8 @@
 namespace Drupal\bhcc_case_management\Form;
 
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class Contact management group entity add / edit form.
