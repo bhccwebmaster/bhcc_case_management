@@ -91,6 +91,7 @@ class CaseManagementPostWebformHandler extends WebformHandlerBase {
     $cm_group_storage = $this->entityTypeManager
       ->getStorage('bhcc_contact_management_group');
     $cm_group_ids = $cm_group_storage->getQuery()
+      ->accessCheck(TRUE)
       ->execute();
     $cm_groups = array_map(function ($id) use ($cm_group_storage) {
       return $cm_group_storage->load($id)->label();
