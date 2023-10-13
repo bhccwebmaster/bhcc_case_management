@@ -113,6 +113,7 @@ class CaseManagementPostWebformHandlerTest extends UnitTestCase {
    * Set up mock objects.
    */
   public function setUp(): void {
+    parent::setUp();
 
     $this->mockServicesContainer();
 
