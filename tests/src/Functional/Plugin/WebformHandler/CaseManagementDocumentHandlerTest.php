@@ -24,7 +24,7 @@ class CaseManagementDocumentHandlerTest extends WebformBrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['webform', 'file', 'bhcc_case_management'];
+  protected static $modules = ['webform', 'file', 'bhcc_case_management'];
 
   /**
    * Theme to enable.
